@@ -1,3 +1,5 @@
+// ignore_for_file: must_be_immutable
+
 import 'package:flutter/material.dart';
 import 'package:flutter_v2ex/components/topic/reply_item.dart';
 
@@ -6,8 +8,8 @@ class ReplySheet extends StatefulWidget {
   List resultList = []; // 回复列表
   String topicId = ''; // 主题id
   List replyMemberList = []; // user列表
-  int? totalPage;
-  List? replyList;
+  final int? totalPage;
+  final List? replyList;
 
   ReplySheet(
       {required this.height,
@@ -113,22 +115,29 @@ class _ReplySheetState extends State<ReplySheet> with TickerProviderStateMixin {
                     var i = widget.replyMemberList.indexOf(e);
                     print('104: ${widget.resultList[i]}');
                     // return Text(e);
-                    return ListView.builder(
-                      physics: const ClampingScrollPhysics(), //重要
-                      itemCount: widget.resultList[i][e].length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          child: ReplyListItem(
-                            reply: widget.resultList[i][e][index],
-                            topicId: widget.topicId,
-                            totalPage: widget.totalPage,
-                            source: 'sheet',
-                          ),
-                        );
-                        // return Text('123');
-                      },
-                    );
+                    return widget.resultList[i][e] != null
+                        ? ListView.builder(
+                            physics: const ClampingScrollPhysics(), //重要
+                            itemCount: widget.resultList[i][e]?.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return Container(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 12),
+                                child: ReplyListItem(
+                                  reply: widget.resultList[i][e][index],
+                                  topicId: widget.topicId,
+                                  totalPage: widget.totalPage,
+                                  source: 'sheet',
+                                ),
+                              );
+                              // return Text('123');
+                            },
+                          )
+                        : const SizedBox(
+                            child: Center(
+                              child: Text('无回复内容'),
+                            ),
+                          );
                   }).toList(),
                 ),
               ),

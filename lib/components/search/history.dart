@@ -1,38 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_v2ex/service/search.dart';
+import 'package:get/get.dart';
 
-class SearchHistory extends StatefulWidget {
-  List? searchHisList;
-  Function? onSelect;
-  Function? onClear;
-  SearchHistory({super.key, this.searchHisList, this.onSelect, this.onClear});
+class SearchHistory extends StatelessWidget {
+  final RxList searchHisList;
+  final Function? onSelect;
+  final Function? onClear;
+  const SearchHistory({
+    super.key,
+    required this.searchHisList,
+    this.onSelect,
+    this.onClear,
+  });
 
-  @override
-  State<SearchHistory> createState() => _SearchHistoryState();
-}
-
-class _SearchHistoryState extends State<SearchHistory> {
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(top: 6, left: 14, bottom: 12),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children:
-            widget.searchHisList != null && widget.searchHisList!.isNotEmpty
+      child: Obx(() => Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: searchHisList.isNotEmpty
                 ? [
                     Row(
-                      // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('搜索历史'),
+                        Text(
+                          '搜索历史',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
                         const Spacer(),
                         TextButton(
-                            // onPressed: () {
-                            //   Search().clear();
-                            //   onClear!();
-                            // },
                             onPressed: () => showDialog(
                                 context: context,
                                 builder: (context) {
@@ -56,10 +54,7 @@ class _SearchHistoryState extends State<SearchHistory> {
                                         child: const Text("确定"),
                                         onPressed: () {
                                           Search().clear();
-                                          widget.onClear!();
-                                          setState(() {
-                                            widget.searchHisList = [];
-                                          });
+                                          onClear?.call();
                                           Navigator.of(context).pop();
                                         },
                                       ),
@@ -81,26 +76,31 @@ class _SearchHistoryState extends State<SearchHistory> {
                       direction: Axis.horizontal,
                       textDirection: TextDirection.ltr,
                       children: [
-                        for (int i = 0; i < widget.searchHisList!.length; i++)
+                        for (int i = 0; i < searchHisList.length; i++)
                           SearchText(
-                            searchText: widget.searchHisList![i],
+                            searchText: searchHisList[i],
                             searchTextIdx: i,
-                            onSelect: widget.onSelect,
+                            onSelect: onSelect,
                           )
                       ],
                     )
                   ]
                 : [],
-      ),
+          )),
     );
   }
 }
 
 class SearchText extends StatelessWidget {
-  String? searchText;
-  Function? onSelect;
-  int? searchTextIdx;
-  SearchText({super.key, this.searchText, this.onSelect, this.searchTextIdx});
+  final String? searchText;
+  final Function? onSelect;
+  final int? searchTextIdx;
+  const SearchText({
+    super.key,
+    this.searchText,
+    this.onSelect,
+    this.searchTextIdx,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -112,12 +112,11 @@ class SearchText extends StatelessWidget {
         child: InkWell(
             onTap: () {
               Search().move(searchText!);
-              onSelect!(searchText);
+              onSelect?.call(searchText);
             },
             borderRadius: BorderRadius.circular(6),
             child: Padding(
-              padding:
-                  const EdgeInsets.only(top: 5, bottom: 5, left: 11, right: 11),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
               child: Text(
                 searchText!,
                 style: TextStyle(

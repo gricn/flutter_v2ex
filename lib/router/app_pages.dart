@@ -1,6 +1,7 @@
 import 'package:flutter/animation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_v2ex/pages/help/network.dart';
+import 'package:flutter_v2ex/pages/hot/index.dart';
 import 'package:get/get.dart';
 import 'package:flutter_v2ex/pages/page_help.dart';
 import 'package:flutter_v2ex/pages/page_message.dart';
@@ -19,7 +20,6 @@ import 'package:flutter_v2ex/pages/my/topics.dart';
 import 'package:flutter_v2ex/pages/my/follow.dart';
 import 'package:flutter_v2ex/pages/page_preview.dart';
 import 'package:flutter_v2ex/pages/search/index.dart';
-import 'package:flutter_v2ex/pages/page_hot.dart';
 import 'package:flutter_v2ex/pages/page_write.dart';
 import 'package:flutter_v2ex/pages/page_nodes_topic.dart';
 import 'package:flutter_v2ex/pages/page_history.dart';
@@ -43,7 +43,7 @@ class AppPages {
       curve: Curves.easeInOut,
     ),
     // 话题详情
-    CustomGetPage('/t/:topicId', TopicDetail()),
+    CustomGetPage('/t/:topicId', const TopicDetail()),
     // webView
     GetPage(
         name: '/webView',
@@ -110,12 +110,12 @@ class AppPages {
 bool sideslip = GStorage().getSideslip();
 
 class CustomGetPage extends GetPage {
-  bool? fullscreen = false;
+  final bool? fullscreen;
 
   CustomGetPage(
     name,
     page, {
-    this.fullscreen,
+    this.fullscreen = false,
     transitionDuration,
   }) : super(
           name: name,

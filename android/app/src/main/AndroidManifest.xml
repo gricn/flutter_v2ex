@@ -2,14 +2,23 @@
     package="com.guozhigq.vvex">
 
     <queries>
+     <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="http" />
+        </intent>
         <!-- If your app opens https URLs -->
         <intent>
             <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
             <data android:scheme="https" />
         </intent>
         <!-- If your app makes calls -->
         <intent>
             <action android:name="android.intent.action.DIAL" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
             <data android:scheme="tel" />
         </intent>
         <!-- If your sends SMS messages -->
@@ -36,6 +45,7 @@
         android:icon="@mipmap/ic_launcher"
         android:allowBackup="true"
         android:fullBackupOnly="true"
+        android:enableOnBackInvokedCallback="true"
         >
         <activity
             android:name=".MainActivity"
@@ -60,6 +70,28 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.SEARCH" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="www.v2ex.com" android:pathPattern="/t/.*" />
+                <data android:scheme="https" android:host="v2ex.com" android:pathPattern="/t/.*" />
+                <data android:scheme="https" android:host="www.cn.v2ex.com" android:pathPattern="/t/.*" />
+                <data android:scheme="https" android:host="cn.v2ex.com" android:pathPattern="/t/.*" />
+                <data android:scheme="https" android:host="www.hk.v2ex.com" android:pathPattern="/t/.*" />
+                <data android:scheme="https" android:host="hk.v2ex.com" android:pathPattern="/t/.*" />
+                <data android:scheme="https" android:host="www.s.v2ex.com" android:pathPattern="/t/.*" />
+                <data android:scheme="https" android:host="s.v2ex.com" android:pathPattern="/t/.*" />
+                <data android:scheme="https" android:host="www.origin.v2ex.com" android:pathPattern="/t/.*" />
+                <data android:scheme="https" android:host="origin.v2ex.com" android:pathPattern="/t/.*" />
+                <data android:scheme="https" android:host="www.global.v2ex.com" android:pathPattern="/t/.*" />
+                <data android:scheme="https" android:host="global.v2ex.com" android:pathPattern="/t/.*" />
+                <data android:scheme="https" android:host="www.fast.v2ex.com" android:pathPattern="/t/.*" />
+                <data android:scheme="https" android:host="fast.v2ex.com" android:pathPattern="/t/.*" />
+                <data android:scheme="https" android:host="www.staging.v2ex.com" android:pathPattern="/t/.*" />
+                <data android:scheme="https" android:host="staging.v2ex.com" android:pathPattern="/t/.*" />
+            </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
@@ -79,11 +111,10 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
-    <!-- <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/> -->
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <!--请求图片权限-->
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" />
 </manifest>

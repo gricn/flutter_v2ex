@@ -4,29 +4,28 @@ import 'dart:io';
 import 'dart:async';
 import 'dart:convert';
 import 'package:dio/dio.dart';
-import 'package:dio/adapter.dart';
+// import 'package:dio/adapter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:flutter_v2ex/utils/utils.dart';
 import 'package:flutter_v2ex/utils/string.dart';
 import 'package:flutter_v2ex/http/interceptor.dart';
-import 'package:dio_http_cache/dio_http_cache.dart';
-import 'package:dio_http2_adapter/dio_http2_adapter.dart';
+// import 'package:dio_http_cache/dio_http_cache.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 
 class Request {
   static final Request _instance = Request._internal();
-
+  static late CookieManager cookieManager;
+  static late final Dio dio;
   factory Request() => _instance;
 
-  Dio dio = Dio()
-    ..httpClientAdapter = Http2Adapter(
-      ConnectionManager(
-        idleTimeout: 10000,
-        // Ignore bad certificate
-        onClientCreate: (_, config) => config.onBadCertificate = (_) => true,
-      ),
-    );
+  // ..httpClientAdapter = Http2Adapter(
+  //   ConnectionManager(
+  //     idleTimeout: 10000,
+  //     // Ignore bad certificate
+  //     onClientCreate: (_, config) => config.onBadCertificate = (_) => true,
+  //   ),
+  // );
 
   dynamic _parseAndDecode(String response) {
     return jsonDecode(response);
@@ -39,11 +38,12 @@ class Request {
   /// 设置cookie
   setCookie() async {
     var cookiePath = await Utils.getCookiePath();
-    var cookieJar = PersistCookieJar(
+    final PersistCookieJar cookieJar = PersistCookieJar(
       ignoreExpires: true,
       storage: FileStorage(cookiePath),
     );
-    Request().dio.interceptors.add(CookieManager(cookieJar));
+    cookieManager = CookieManager(cookieJar);
+    dio.interceptors.add(cookieManager);
   }
 
   /*
@@ -55,9 +55,9 @@ class Request {
       //请求基地址,可以包含子路径
       baseUrl: Strings.v2exHost,
       //连接服务器超时时间，单位是毫秒.
-      connectTimeout: 12000,
+      connectTimeout: const Duration(milliseconds: 12000),
       //响应流上前后两次接受到数据的间隔，单位为毫秒。
-      receiveTimeout: 12000,
+      receiveTimeout: const Duration(milliseconds: 12000),
       //Http请求头.
       // headers: {
       //   'cookie': '',
@@ -73,7 +73,7 @@ class Request {
     setCookie();
     //添加拦截器
     dio.interceptors
-      ..add(DioCacheManager(CacheConfig(baseUrl: Strings.v2exHost)).interceptor)
+      // ..add(DioCacheManager(CacheConfig(baseUrl: Strings.v2exHost)).interceptor)
       ..add(ApiInterceptor())
       // 日志拦截器 输出请求、响应内容
       ..add(LogInterceptor(
@@ -82,24 +82,22 @@ class Request {
         responseHeader: false,
       ));
     // (dio.transformer as DefaultTransformer).jsonDecodeCallback = parseJson;
-    (dio.httpClientAdapter as DefaultHttpClientAdapter).onHttpClientCreate =
-        (HttpClient client) {
-      // config the http client
-      client.findProxy = (uri) {
-        // proxy all request to localhost:8888
-        // return 'PROXY 192.168.1.60:7890';
-        // return 'PROXY 172.16.32.186:7890';
-        // return 'PROXY localhost:7890';
-        // return 'PROXY 127.0.0.1:7890';
-        // 不设置代理 TODO 打包前关闭代理
-        return 'DIRECT';
-      };
-      client.badCertificateCallback =
-          (X509Certificate cert, String host, int port) => true;
-      // return null;
-      // you can also create a HttpClient to dio
-      return client;
-    };
+    // (dio.httpClientAdapter as DefaultHttpClientAdapter).onHttpClientCreate =
+    //     (HttpClient client) {
+    //   // config the http client
+    //   client.findProxy = (uri) {
+    //     // proxy all request to localhost:8888
+    //     // return 'PROXY localhost:7890';
+    //     // return 'PROXY 127.0.0.1:7890';
+    //     // 不设置代理 TODO 打包前关闭代理
+    //     return 'DIRECT';
+    //   };
+    // client.badCertificateCallback =
+    //     (X509Certificate cert, String host, int port) => true;
+    // return null;
+    // you can also create a HttpClient to dio
+    //   return client;
+    // };
 
     dio.options.validateStatus = (status) {
       return status! >= 200 && status < 300 || status == 304 || status == 302;
@@ -110,6 +108,7 @@ class Request {
    * get请求
    */
   get(url, {data, cacheOptions, options, cancelToken, extra}) async {
+    // extra pc ok , mob error
     Response response;
     Options options;
     String ua = 'mob';
@@ -118,6 +117,7 @@ class Request {
       ua = extra!['ua'] ?? 'mob';
       resType = extra!['resType'] ?? ResponseType.json;
     }
+    // headerUa(pc) ResponseType.json;
     if (cacheOptions != null) {
       cacheOptions.headers = {'user-agent': headerUa(ua)};
       options = cacheOptions;
@@ -134,9 +134,9 @@ class Request {
         cancelToken: cancelToken,
       );
       return response;
-    } on DioError catch (e, handler) {
+    } on DioException catch (e) {
       print('get error---------$e');
-      return Future.error(_dioError(e));
+      return Future.error(ApiInterceptor.dioError(e));
     }
   }
 
@@ -155,9 +155,9 @@ class Request {
       );
       print('post success---------${response.data}');
       return response;
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       print('post error---------$e');
-      return Future.error(_dioError(e));
+      return Future.error(ApiInterceptor.dioError(e));
     }
   }
 
@@ -175,29 +175,9 @@ class Request {
       print('downloadFile success---------${response.data}');
 
       return response.data;
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       print('downloadFile error---------$e');
-      return Future.error(_dioError(e));
-    }
-  }
-
-  // 处理 Dio 异常
-  static String _dioError(DioError error) {
-    switch (error.type) {
-      case DioErrorType.connectTimeout:
-        return "网络连接超时，请检查网络设置";
-      case DioErrorType.receiveTimeout:
-        return "响应超时，请稍后重试！";
-      case DioErrorType.sendTimeout:
-        return "发送请求超时，请检查网络设置";
-      case DioErrorType.response:
-        return "服务器异常，请稍后重试！";
-      case DioErrorType.cancel:
-        return "请求已被取消，请重新请求";
-      case DioErrorType.other:
-        return "网络异常，请稍后重试！";
-      default:
-        return "Dio异常";
+      return Future.error(ApiInterceptor.dioError(e));
     }
   }
 

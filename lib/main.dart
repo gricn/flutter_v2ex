@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter_v2ex/http/github.dart';
+import 'package:flutter_v2ex/utils/app_scheme.dart';
 
 import 'package:get/get.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -21,7 +22,6 @@ import 'package:flutter_v2ex/service/translation.dart';
 import 'package:flutter_v2ex/service/local_notice.dart';
 import 'package:flutter_v2ex/components/adaptive/main.dart';
 import 'package:flutter_v2ex/components/common/custom_loading.dart';
-import 'package:flutter_v2ex/controller/fontsize_controller.dart';
 
 void main() async {
   // 初始化配置
@@ -101,6 +101,7 @@ class _MyAppState extends State<MyApp> {
     if (GStorage().getAutoUpdate()) {
       GithubApi.checkUpdate();
     }
+    VvexScheme.init();
   }
 
   @override
@@ -117,8 +118,6 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    final FontSizeController? fontSizeController =
-        Get.put(FontSizeController());
     return DynamicColorBuilder(
       builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
         ColorScheme? lightColorScheme;
@@ -142,8 +141,6 @@ class _MyAppState extends State<MyApp> {
           getPages: AppPages.getPages,
           theme: ThemeData(
             fontFamily: 'NotoSansSC',
-            // fontFamily: GoogleFonts.getFont('Noto Sans').fontFamily,
-            textTheme: fontSizeController?.getFontSize ?? const TextTheme(),
             useMaterial3: true,
             colorScheme: currentThemeValue == ThemeType.dark
                 ? darkColorScheme
@@ -151,7 +148,6 @@ class _MyAppState extends State<MyApp> {
           ),
           darkTheme: ThemeData(
             fontFamily: 'NotoSansSC',
-            // fontFamily: GoogleFonts.getFont('Noto Sans').fontFamily,
             useMaterial3: true,
             colorScheme: currentThemeValue == ThemeType.light
                 ? lightColorScheme
@@ -183,7 +179,8 @@ class _MyAppState extends State<MyApp> {
 
                 /// 设置文字大小不跟随系统更改
                 child: MediaQuery(
-                  data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                  data: MediaQuery.of(context).copyWith(
+                      textScaleFactor: GStorage().getGlobalFs() / 14.0),
                   // 适配 pad 布局
                   child: CAdaptiveLayout(child: child),
                   // mob布局

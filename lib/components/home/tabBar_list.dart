@@ -8,7 +8,6 @@ import 'package:flutter_v2ex/components/common/footer.dart';
 import 'package:flutter_v2ex/http/dio_web.dart';
 import 'package:flutter_v2ex/models/tabs.dart';
 import 'package:flutter_v2ex/pages/page_home.dart';
-import 'package:flutter_v2ex/utils/event_bus.dart';
 import 'package:flutter_v2ex/models/web/item_tab_topic.dart';
 import 'package:flutter_v2ex/components/home/list_item.dart';
 import 'package:flutter_v2ex/components/common/skeleton_topic.dart';
@@ -19,9 +18,12 @@ import 'package:flutter_v2ex/pages/home/controller.dart';
 
 class TabBarList extends StatefulWidget {
   final TabModel tabItem;
-  int tabIndex = 0;
-  TabBarList({Key? key, required this.tabItem, required this.tabIndex})
-      : super(key: key);
+  final int tabIndex;
+  const TabBarList({
+    Key? key,
+    required this.tabItem,
+    this.tabIndex = 0,
+  }) : super(key: key);
 
   @override
   State<TabBarList> createState() => _TabBarListState();
@@ -80,16 +82,13 @@ class _TabBarListState extends State<TabBarList>
         final ScrollDirection direction =
             _controller.position.userScrollDirection;
         if (direction == ScrollDirection.forward) {
-          print(_controller.offset);
           homeStream.add(true);
         } else if (direction == ScrollDirection.reverse) {
-          print(_controller.offset);
           homeStream.add(false);
         }
       },
     );
 
-    eventBus.on('ignoreTopic', (arg) => {print('69: $arg')});
     _tabStateController.tabIndex.listen((value) {
       if (value == widget.tabIndex) {
         animateToTop();
@@ -142,7 +141,7 @@ class _TabBarListState extends State<TabBarList>
         _currentPage += 1;
 
         var userInfo = GStorage().getUserInfo();
-        if (userInfo.isNotEmpty) {
+        if (userInfo.isNotEmpty && GStorage().getAutoSign()) {
           // 登录状态自动签到 补充用
           DioRequestWeb.dailyMission();
         }
@@ -307,9 +306,8 @@ class _TabBarListState extends State<TabBarList>
 }
 
 class ChildNodes extends StatelessWidget {
-  List childNodeList = [];
-
-  ChildNodes({Key? key, required this.childNodeList}) : super(key: key);
+  final List childNodeList;
+  const ChildNodes({Key? key, required this.childNodeList}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

@@ -35,14 +35,13 @@ class Utils {
   }
 
   static Future<String> getCookiePath() async {
-    Directory tempDir = await getApplicationDocumentsDirectory();
-    String tempPath = "${tempDir.path}/.vvexCookie";
+    Directory tempDir = await getApplicationSupportDirectory();
+    String tempPath = "${tempDir.path}/.vvexCookie/";
     Directory dir = Directory(tempPath);
     bool b = await dir.exists();
     if (!b) {
       dir.createSync(recursive: true);
     }
-
     return tempPath;
   }
 
@@ -393,7 +392,10 @@ class Utils {
   Future uploadImage() async {
     final List<AssetEntity>? assets = await AssetPicker.pickAssets(
       Get.context!,
-      pickerConfig: const AssetPickerConfig(maxAssets: 1),
+      pickerConfig: const AssetPickerConfig(
+        maxAssets: 1,
+        requestType: RequestType.image,
+      ),
     );
     if (assets != null && assets.isNotEmpty) {
       SmartDialog.showLoading(msg: '上传中...');

@@ -61,23 +61,20 @@ class _SettingPageState extends State<SettingPage> {
               },
               child: const Text('取消')),
           TextButton(
-              onPressed: () async {
-                Navigator.pop(context);
+            onPressed: () async {
+              Navigator.pop(context);
 
-                /// 删除cookie目录
-                try {
-                  await Login.signOut();
-                  SmartDialog.showToast('已退出登录 ✅');
-                  // await Request().get('/');
-                  // if(context.mounted){
-                  //   Navigator.pop(context);
-                  // }
-                  Get.offAll(const HomePage());
-                } catch (err) {
-                  SmartDialog.showToast(err.toString());
-                }
-              },
-              child: const Text('确定'))
+              /// 删除cookie目录
+              try {
+                await Login.signOut();
+                SmartDialog.showToast('已退出登录 ✅');
+                Get.offAll(const HomePage());
+              } catch (err) {
+                SmartDialog.showToast(err.toString());
+              }
+            },
+            child: const Text('确定'),
+          )
         ],
       ),
     );
@@ -85,15 +82,12 @@ class _SettingPageState extends State<SettingPage> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    TextStyle titleStyle = Theme.of(context).textTheme.titleLarge!;
     TextStyle subTitleStyle = Theme.of(context).textTheme.labelMedium!;
-    Color iconStyle = Theme.of(context).colorScheme.onBackground;
     TextStyle groupTitleStyle = Theme.of(context)
         .textTheme
         .titleSmall!
@@ -209,8 +203,8 @@ class _SettingPageState extends State<SettingPage> {
             ListTile(
               onTap: () {
                 setState(() {
-                  noticeOn = !noticeOn;
-                  GStorage().setNoticeOn(noticeOn);
+                  sideslip = !sideslip;
+                  GStorage().setSideslip(sideslip);
                 });
               },
               // leading: Icon(Icons.notifications_none, color: iconStyle),
